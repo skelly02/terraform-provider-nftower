@@ -217,6 +217,14 @@ func marshalComputeEnvAWSBatchConfig(config *ComputeEnvAWSBatchConfig) map[strin
 		payload["headJobMemoryMb"] = config.HeadJobMemoryMb
 	}
 
+	if config.PreRunScript != "" {
+		payload["preRunScript"] = config.PreRunScript
+	}
+
+	if config.PostRunScript != "" {
+		payload["postRunScript"] = config.PostRunScript
+	}
+
 	return payload
 }
 

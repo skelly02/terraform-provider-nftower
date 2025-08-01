@@ -40,7 +40,7 @@ func resourcePipeline() *schema.Resource {
 			"compute_environment_id": {
 				Description: "The id of the compute environment to use.",
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 			},
 			"pipeline": {
 				Description: `A Git repository name or URL e.g., "nextflow-io/hello" or "https://github.com/nextflow-io/hello". Private repositories require credentials. Local repositories are supported using the "file:" prefix followed by the repository path`,
@@ -51,7 +51,7 @@ func resourcePipeline() *schema.Resource {
 			"work_dir": {
 				Description: "The bucket path where the pipeline scratch data is stored. When only the bucket name is specified, Tower will automatically create a scratch sub-folder.",
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 			},
 			"revision": {
 				Description: "A valid repository commit Id, tag or branch name",
@@ -176,10 +176,27 @@ func resourcePipelineRead(ctx context.Context, d *schema.ResourceData, meta any)
 
 	d.Set("name", pipeline["name"].(string))
 	d.Set("pipeline", pipeline["pipeline"].(string))
-	d.Set("work_dir", pipeline["workDir"].(string))
 
-	computeEnv := pipeline["computeEnv"].(map[string]interface{})
-	d.Set("compute_environment_id", computeEnv["id"].(string))
+	// handle optional workDir
+	if v, ok := pipeline["workDir"].(string); ok {
+		d.Set("work_dir", v)
+	} else {
+		d.Set("work_dir", nil)
+	}
+
+	// handle optional Compute Environment
+	// check if computeEnv is included in the response
+	if computeEnvRaw, ok := pipeline["computeEnv"]; ok && computeEnvRaw != nil {
+		// if its included, get the computeEnv map
+		if computeEnv, ok := computeEnvRaw.(map[string]interface{}); ok {
+			// check for id field
+			if id, ok := computeEnv["id"].(string); ok {
+				d.Set("compute_environment_id", id)
+			}
+		}
+	} else {
+		d.Set("compute_environment_id", nil)
+	}
 
 	if v, ok := pipeline["revision"].(string); ok {
 		d.Set("revision", v)

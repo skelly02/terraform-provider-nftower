@@ -68,7 +68,7 @@ terraform {
     }
     nftower = {
       source = "skelly02/nftower"
-      # See installation notes https://github.com/skelly02/terraform-provider-nftower/blob/pre-run-script/NOTES.md
+      # See installation notes https://github.com/skelly02/terraform-provider-nftower/blob/main/NOTES.md
     }
   }
 }
